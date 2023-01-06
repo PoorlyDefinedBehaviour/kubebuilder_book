@@ -92,7 +92,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := r.List(
 		ctx,
 		&childJobs,
-		client.InNamespace(req.Name),
+		client.InNamespace(req.Namespace),
 		client.MatchingFields{jobOwnerKey: req.Name},
 	); err != nil {
 		logger.Error(err, "unable to list child jobs")
@@ -108,6 +108,7 @@ func (r *CronJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	for i, job := range childJobs.Items {
 		_, finishedType := isJobFinished(&job)
+
 		switch finishedType {
 		// Not finished
 		case "":
@@ -332,6 +333,7 @@ func getNextSchedule(cronJob *batchv1.CronJob, now time.Time) (lastMissed time.T
 	}
 
 	if earliestTime.After(now) {
+
 		return lastMissed, sched.Next(now), nil
 	}
 
